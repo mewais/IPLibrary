@@ -2,17 +2,20 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.Utils.all;
+
 entity AXI4_RAM is
 	generic (
 		READ_ONLY           : boolean           := false;
         MEMORY_FILE         : string            := "AXI4_RAM.mif";
+        RAM_WIDTH	: integer	:= 32;
+		RAM_DEPTH	: integer	:= 64;
         
 		-- Do not modify the parameters beyond this line
 
 
 		-- Parameters of Axi Slave Bus Interface S00_AXI
 		C_S00_AXI_ID_WIDTH	: integer	:= 1;
-		C_S00_AXI_DATA_WIDTH	: integer	:= 32;
 		C_S00_AXI_ADDR_WIDTH	: integer	:= 8;
 		C_S00_AXI_AWUSER_WIDTH	: integer	:= 0;
 		C_S00_AXI_ARUSER_WIDTH	: integer	:= 0;
@@ -43,8 +46,8 @@ entity AXI4_RAM is
 		s00_axi_awuser	: in std_logic_vector(C_S00_AXI_AWUSER_WIDTH-1 downto 0);
 		s00_axi_awvalid	: in std_logic;
 		s00_axi_awready	: out std_logic;
-		s00_axi_wdata	: in std_logic_vector(C_S00_AXI_DATA_WIDTH-1 downto 0);
-		s00_axi_wstrb	: in std_logic_vector((C_S00_AXI_DATA_WIDTH/8)-1 downto 0);
+		s00_axi_wdata	: in std_logic_vector(RAM_WIDTH-1 downto 0);
+		s00_axi_wstrb	: in std_logic_vector((RAM_WIDTH/8)-1 downto 0);
 		s00_axi_wlast	: in std_logic;
 		s00_axi_wuser	: in std_logic_vector(C_S00_AXI_WUSER_WIDTH-1 downto 0);
 		s00_axi_wvalid	: in std_logic;
@@ -68,7 +71,7 @@ entity AXI4_RAM is
 		s00_axi_arvalid	: in std_logic;
 		s00_axi_arready	: out std_logic;
 		s00_axi_rid	: out std_logic_vector(C_S00_AXI_ID_WIDTH-1 downto 0);
-		s00_axi_rdata	: out std_logic_vector(C_S00_AXI_DATA_WIDTH-1 downto 0);
+		s00_axi_rdata	: out std_logic_vector(RAM_WIDTH-1 downto 0);
 		s00_axi_rresp	: out std_logic_vector(1 downto 0);
 		s00_axi_rlast	: out std_logic;
 		s00_axi_ruser	: out std_logic_vector(C_S00_AXI_RUSER_WIDTH-1 downto 0);
@@ -82,66 +85,67 @@ architecture arch_imp of AXI4_RAM is
 	-- component declaration
 	component AXI4_RAM_S_AXI is
 		generic (
-		READ_ONLY           : boolean           := false;
-        MEMORY_FILE         : string            := "AXI4_RAM.mif";
-		C_S_AXI_ID_WIDTH	: integer	:= 1;
-		C_S_AXI_DATA_WIDTH	: integer	:= 32;
-		C_S_AXI_ADDR_WIDTH	: integer	:= 8;
-		C_S_AXI_AWUSER_WIDTH	: integer	:= 0;
-		C_S_AXI_ARUSER_WIDTH	: integer	:= 0;
-		C_S_AXI_WUSER_WIDTH	: integer	:= 0;
-		C_S_AXI_RUSER_WIDTH	: integer	:= 0;
-		C_S_AXI_BUSER_WIDTH	: integer	:= 0
+            READ_ONLY           : boolean           := false;
+            MEMORY_FILE         : string            := "AXI4_RAM.mif";
+            RAM_DEPTH           : integer   := 64;
+            C_S_AXI_ID_WIDTH	: integer	:= 1;
+            C_S_AXI_DATA_WIDTH	: integer	:= 32;
+            C_S_AXI_ADDR_WIDTH	: integer	:= 8;
+            C_S_AXI_AWUSER_WIDTH	: integer	:= 0;
+            C_S_AXI_ARUSER_WIDTH	: integer	:= 0;
+            C_S_AXI_WUSER_WIDTH	: integer	:= 0;
+            C_S_AXI_RUSER_WIDTH	: integer	:= 0;
+            C_S_AXI_BUSER_WIDTH	: integer	:= 0
 		);
 		port (
-		S_AXI_ACLK	: in std_logic;
-		S_AXI_ARESETN	: in std_logic;
-		S_AXI_AWID	: in std_logic_vector(C_S_AXI_ID_WIDTH-1 downto 0);
-		S_AXI_AWADDR	: in std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
-		S_AXI_AWLEN	: in std_logic_vector(7 downto 0);
-		S_AXI_AWSIZE	: in std_logic_vector(2 downto 0);
-		S_AXI_AWBURST	: in std_logic_vector(1 downto 0);
-		S_AXI_AWLOCK	: in std_logic;
-		S_AXI_AWCACHE	: in std_logic_vector(3 downto 0);
-		S_AXI_AWPROT	: in std_logic_vector(2 downto 0);
-		S_AXI_AWQOS	: in std_logic_vector(3 downto 0);
-		S_AXI_AWREGION	: in std_logic_vector(3 downto 0);
-		S_AXI_AWUSER	: in std_logic_vector(C_S_AXI_AWUSER_WIDTH-1 downto 0);
-		S_AXI_AWVALID	: in std_logic;
-		S_AXI_AWREADY	: out std_logic;
-		S_AXI_WDATA	: in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
-		S_AXI_WSTRB	: in std_logic_vector((C_S_AXI_DATA_WIDTH/8)-1 downto 0);
-		S_AXI_WLAST	: in std_logic;
-		S_AXI_WUSER	: in std_logic_vector(C_S_AXI_WUSER_WIDTH-1 downto 0);
-		S_AXI_WVALID	: in std_logic;
-		S_AXI_WREADY	: out std_logic;
-		S_AXI_BID	: out std_logic_vector(C_S_AXI_ID_WIDTH-1 downto 0);
-		S_AXI_BRESP	: out std_logic_vector(1 downto 0);
-		S_AXI_BUSER	: out std_logic_vector(C_S_AXI_BUSER_WIDTH-1 downto 0);
-		S_AXI_BVALID	: out std_logic;
-		S_AXI_BREADY	: in std_logic;
-		S_AXI_ARID	: in std_logic_vector(C_S_AXI_ID_WIDTH-1 downto 0);
-		S_AXI_ARADDR	: in std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
-		S_AXI_ARLEN	: in std_logic_vector(7 downto 0);
-		S_AXI_ARSIZE	: in std_logic_vector(2 downto 0);
-		S_AXI_ARBURST	: in std_logic_vector(1 downto 0);
-		S_AXI_ARLOCK	: in std_logic;
-		S_AXI_ARCACHE	: in std_logic_vector(3 downto 0);
-		S_AXI_ARPROT	: in std_logic_vector(2 downto 0);
-		S_AXI_ARQOS	: in std_logic_vector(3 downto 0);
-		S_AXI_ARREGION	: in std_logic_vector(3 downto 0);
-		S_AXI_ARUSER	: in std_logic_vector(C_S_AXI_ARUSER_WIDTH-1 downto 0);
-		S_AXI_ARVALID	: in std_logic;
-		S_AXI_ARREADY	: out std_logic;
-		S_AXI_RID	: out std_logic_vector(C_S_AXI_ID_WIDTH-1 downto 0);
-		S_AXI_RDATA	: out std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
-		S_AXI_RRESP	: out std_logic_vector(1 downto 0);
-		S_AXI_RLAST	: out std_logic;
-		S_AXI_RUSER	: out std_logic_vector(C_S_AXI_RUSER_WIDTH-1 downto 0);
-		S_AXI_RVALID	: out std_logic;
-		S_AXI_RREADY	: in std_logic
+            S_AXI_ACLK	: in std_logic;
+            S_AXI_ARESETN	: in std_logic;
+            S_AXI_AWID	: in std_logic_vector(C_S_AXI_ID_WIDTH-1 downto 0);
+            S_AXI_AWADDR	: in std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+            S_AXI_AWLEN	: in std_logic_vector(7 downto 0);
+            S_AXI_AWSIZE	: in std_logic_vector(2 downto 0);
+            S_AXI_AWBURST	: in std_logic_vector(1 downto 0);
+            S_AXI_AWLOCK	: in std_logic;
+            S_AXI_AWCACHE	: in std_logic_vector(3 downto 0);
+            S_AXI_AWPROT	: in std_logic_vector(2 downto 0);
+            S_AXI_AWQOS	: in std_logic_vector(3 downto 0);
+            S_AXI_AWREGION	: in std_logic_vector(3 downto 0);
+            S_AXI_AWUSER	: in std_logic_vector(C_S_AXI_AWUSER_WIDTH-1 downto 0);
+            S_AXI_AWVALID	: in std_logic;
+            S_AXI_AWREADY	: out std_logic;
+            S_AXI_WDATA	: in std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
+            S_AXI_WSTRB	: in std_logic_vector((C_S_AXI_DATA_WIDTH/8)-1 downto 0);
+            S_AXI_WLAST	: in std_logic;
+            S_AXI_WUSER	: in std_logic_vector(C_S_AXI_WUSER_WIDTH-1 downto 0);
+            S_AXI_WVALID	: in std_logic;
+            S_AXI_WREADY	: out std_logic;
+            S_AXI_BID	: out std_logic_vector(C_S_AXI_ID_WIDTH-1 downto 0);
+            S_AXI_BRESP	: out std_logic_vector(1 downto 0);
+            S_AXI_BUSER	: out std_logic_vector(C_S_AXI_BUSER_WIDTH-1 downto 0);
+            S_AXI_BVALID	: out std_logic;
+            S_AXI_BREADY	: in std_logic;
+            S_AXI_ARID	: in std_logic_vector(C_S_AXI_ID_WIDTH-1 downto 0);
+            S_AXI_ARADDR	: in std_logic_vector(C_S_AXI_ADDR_WIDTH-1 downto 0);
+            S_AXI_ARLEN	: in std_logic_vector(7 downto 0);
+            S_AXI_ARSIZE	: in std_logic_vector(2 downto 0);
+            S_AXI_ARBURST	: in std_logic_vector(1 downto 0);
+            S_AXI_ARLOCK	: in std_logic;
+            S_AXI_ARCACHE	: in std_logic_vector(3 downto 0);
+            S_AXI_ARPROT	: in std_logic_vector(2 downto 0);
+            S_AXI_ARQOS	: in std_logic_vector(3 downto 0);
+            S_AXI_ARREGION	: in std_logic_vector(3 downto 0);
+            S_AXI_ARUSER	: in std_logic_vector(C_S_AXI_ARUSER_WIDTH-1 downto 0);
+            S_AXI_ARVALID	: in std_logic;
+            S_AXI_ARREADY	: out std_logic;
+            S_AXI_RID	: out std_logic_vector(C_S_AXI_ID_WIDTH-1 downto 0);
+            S_AXI_RDATA	: out std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
+            S_AXI_RRESP	: out std_logic_vector(1 downto 0);
+            S_AXI_RLAST	: out std_logic;
+            S_AXI_RUSER	: out std_logic_vector(C_S_AXI_RUSER_WIDTH-1 downto 0);
+            S_AXI_RVALID	: out std_logic;
+            S_AXI_RREADY	: in std_logic
 		);
-	end component AXI4_RAM_v1_0_S00_AXI;
+	end component AXI4_RAM_S_AXI;
 
 begin
 
@@ -151,8 +155,9 @@ AXI4_RAM_S_AXI_inst : AXI4_RAM_S_AXI
 	    READ_ONLY           => READ_ONLY,
         MEMORY_FILE         => MEMORY_FILE,
 		C_S_AXI_ID_WIDTH	=> C_S00_AXI_ID_WIDTH,
-		C_S_AXI_DATA_WIDTH	=> C_S00_AXI_DATA_WIDTH,
+		C_S_AXI_DATA_WIDTH	=> RAM_WIDTH,
 		C_S_AXI_ADDR_WIDTH	=> C_S00_AXI_ADDR_WIDTH,
+		RAM_DEPTH       	=> RAM_DEPTH,
 		C_S_AXI_AWUSER_WIDTH	=> C_S00_AXI_AWUSER_WIDTH,
 		C_S_AXI_ARUSER_WIDTH	=> C_S00_AXI_ARUSER_WIDTH,
 		C_S_AXI_WUSER_WIDTH	=> C_S00_AXI_WUSER_WIDTH,

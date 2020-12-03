@@ -2,6 +2,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.Utils.all;
+
 library std;
 use std.textio.all;
 
@@ -10,6 +12,7 @@ entity AXI4_RAM_S_AXI is
     (
         READ_ONLY           : boolean           := false;
         MEMORY_FILE         : string            := "AXI4_RAM.mif";
+        RAM_DEPTH           : integer   := 64;
         -- Do not modify the parameters beyond this line
 
         -- Width of ID for for write address, write data, read address and read data
@@ -215,13 +218,13 @@ architecture arch_imp of AXI4_RAM_S_AXI is
     --ADDR_LSB = 3 for 42 bits (n downto 3)
 
     constant ADDR_LSB  : integer := (C_S_AXI_DATA_WIDTH/32)+ 1;
-    constant OPT_MEM_ADDR_BITS : integer := 5;
+    constant OPT_MEM_ADDR_BITS : integer := LOG2(RAM_DEPTH)-1;
     constant USER_NUM_MEM: integer := 1;
     constant low : std_logic_vector (C_S_AXI_ADDR_WIDTH - 1 downto 0) := "00000000";
     ------------------------------------------------
     ---- Signals for user logic memory space example
     --------------------------------------------------
-    type WORD_RAM_TYPE is array (0 to 63) of std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
+    type WORD_RAM_TYPE is array (0 to RAM_DEPTH-1) of std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
     
     impure function init_mem(mif_file_name : in string) return WORD_RAM_TYPE is
         file mif_file : text open read_mode is mif_file_name;
