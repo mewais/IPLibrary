@@ -124,6 +124,40 @@ set_property widget {textEdit} [ipgui::get_guiparamspec -name "MEMORY_FILE" -com
 set_property value AXI4_RAM.mif [ipx::get_user_parameters MEMORY_FILE -of_objects [ipx::current_core]]
 set_property value AXI4_RAM.mif [ipx::get_hdl_parameters MEMORY_FILE -of_objects [ipx::current_core]]
 
+ipgui::add_param -name {C_S00_AXI_DATA_WIDTH} -component [ipx::current_core]
+set_property display_name {AXI Data Width} [ipgui::get_guiparamspec -name "C_S00_AXI_DATA_WIDTH" -component [ipx::current_core] ]
+set_property tooltip {Width of AXI Data word} [ipgui::get_guiparamspec -name "C_S00_AXI_DATA_WIDTH" -component [ipx::current_core] ]
+set_property widget {textEdit} [ipgui::get_guiparamspec -name "C_S00_AXI_DATA_WIDTH" -component [ipx::current_core] ]
+set_property enablement_value false [ipx::get_user_parameters C_S00_AXI_DATA_WIDTH -of_objects [ipx::current_core]]
+set_property value_tcl_expr {$RAM_WIDTH} [ipx::get_user_parameters C_S00_AXI_DATA_WIDTH -of_objects [ipx::current_core]]
+redirect -variable WIDTH {get_property value [ipx::get_user_parameters RAM_WIDTH -of_objects [ipx::current_core]]}
+set_property value {get_property value [ipx::get_user_parameters RAM_DEPTH -of_objects [ipx::current_core]]} [ipx::get_user_parameters C_S00_AXI_DATA_WIDTH -of_objects [ipx::current_core]]
+
+set_property display_name {AXI Addr Width} [ipgui::get_guiparamspec -name "C_S00_AXI_ADDR_WIDTH" -component [ipx::current_core] ]
+set_property tooltip {Width of AXI address} [ipgui::get_guiparamspec -name "C_S00_AXI_ADDR_WIDTH" -component [ipx::current_core] ]
+set_property widget {textEdit} [ipgui::get_guiparamspec -name "C_S00_AXI_ADDR_WIDTH" -component [ipx::current_core] ]
+set_property enablement_value false [ipx::get_user_parameters C_S00_AXI_ADDR_WIDTH -of_objects [ipx::current_core]]
+set_property value_tcl_expr {(log($RAM_WIDTH/8)/log(2))+(log($RAM_DEPTH)/log(2))} [ipx::get_user_parameters C_S00_AXI_ADDR_WIDTH -of_objects [ipx::current_core]]
+set_property value {get_property value [ipx::get_user_parameters RAM_WIDTH -of_objects [ipx::current_core]]} [ipx::get_user_parameters C_S00_AXI_ADDR_WIDTH -of_objects [ipx::current_core]]
+set_property value {get_property value [ipx::get_user_parameters RAM_WIDTH -of_objects [ipx::current_core]]} [ipx::get_hdl_parameters C_S00_AXI_ADDR_WIDTH -of_objects [ipx::current_core]]
+
+# GUI
+ipgui::add_group -name {Memory} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "Page 0" -component [ipx::current_core] ] -display_name {Memory}
+ipgui::add_group -name {AXI interface} -component [ipx::current_core] -parent [ipgui::get_pagespec -name "Page 0" -component [ipx::current_core] ] -display_name {AXI interface}
+ipgui::move_param -component [ipx::current_core] -order 0 [ipgui::get_guiparamspec -name "READ_ONLY" -component [ipx::current_core]] -parent [ipgui::get_groupspec -name "Memory" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "RAM_WIDTH" -component [ipx::current_core]] -parent [ipgui::get_groupspec -name "Memory" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 2 [ipgui::get_guiparamspec -name "RAM_DEPTH" -component [ipx::current_core]] -parent [ipgui::get_groupspec -name "Memory" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 3 [ipgui::get_guiparamspec -name "MEMORY_FILE" -component [ipx::current_core]] -parent [ipgui::get_groupspec -name "Memory" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 0 [ipgui::get_guiparamspec -name "C_S00_AXI_ID_WIDTH" -component [ipx::current_core]] -parent [ipgui::get_groupspec -name "AXI interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 1 [ipgui::get_guiparamspec -name "C_S00_AXI_ADDR_WIDTH" -component [ipx::current_core]] -parent [ipgui::get_groupspec -name "AXI interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 2 [ipgui::get_guiparamspec -name "C_S00_AXI_DATA_WIDTH" -component [ipx::current_core]] -parent [ipgui::get_groupspec -name "AXI interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 3 [ipgui::get_guiparamspec -name "C_S00_AXI_AWUSER_WIDTH" -component [ipx::current_core]] -parent [ipgui::get_groupspec -name "AXI interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 4 [ipgui::get_guiparamspec -name "C_S00_AXI_ARUSER_WIDTH" -component [ipx::current_core]] -parent [ipgui::get_groupspec -name "AXI interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 5 [ipgui::get_guiparamspec -name "C_S00_AXI_WUSER_WIDTH" -component [ipx::current_core]] -parent [ipgui::get_groupspec -name "AXI interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 6 [ipgui::get_guiparamspec -name "C_S00_AXI_RUSER_WIDTH" -component [ipx::current_core]] -parent [ipgui::get_groupspec -name "AXI interface" -component [ipx::current_core]]
+ipgui::move_param -component [ipx::current_core] -order 7 [ipgui::get_guiparamspec -name "C_S00_AXI_BUSER_WIDTH" -component [ipx::current_core]] -parent [ipgui::get_groupspec -name "AXI interface" -component [ipx::current_core]]
+
+
 ipx::check_integrity -quiet [ipx::current_core]
 ipx::update_checksums [ipx::current_core]
 ipx::save_core [ipx::current_core]
