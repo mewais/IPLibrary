@@ -17,6 +17,7 @@ entity AXI4_RAM is
 		-- Parameters of Axi Slave Bus Interface S00_AXI
 		C_S00_AXI_ID_WIDTH	: integer	:= 1;
 		C_S00_AXI_ADDR_WIDTH	: integer	:= 8;
+		C_S00_AXI_DATA_WIDTH	: integer	:= 32;
 		C_S00_AXI_AWUSER_WIDTH	: integer	:= 0;
 		C_S00_AXI_ARUSER_WIDTH	: integer	:= 0;
 		C_S00_AXI_WUSER_WIDTH	: integer	:= 0;
