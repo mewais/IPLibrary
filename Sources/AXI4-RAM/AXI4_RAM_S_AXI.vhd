@@ -220,7 +220,7 @@ architecture arch_imp of AXI4_RAM_S_AXI is
     constant ADDR_LSB  : integer := (C_S_AXI_DATA_WIDTH/32)+ 1;
     constant OPT_MEM_ADDR_BITS : integer := LOG2(RAM_DEPTH)-1;
     constant USER_NUM_MEM: integer := 1;
-    constant low : std_logic_vector (C_S_AXI_ADDR_WIDTH - 1 downto 0) := "00000000";
+    constant low : std_logic_vector (C_S_AXI_ADDR_WIDTH - 1 downto 0) := (others => '0');
     ------------------------------------------------
     ---- Signals for user logic memory space example
     --------------------------------------------------
@@ -531,20 +531,11 @@ begin
                     end if;
                 end if;
             end loop;
-            if ( mem_rden = '1') then
-                mem_dataout <= mem_ram(to_integer(unsigned(mem_address)));
-            end if;
         end process WORD_RAM_PROC;
     end generate RAM_GEN; 
 
-    ROM_GEN: if (READ_ONLY) generate
-        WORD_ROM_PROC : process (S_AXI_ACLK) is
-        begin
-            if ( mem_rden = '1') then
-                mem_dataout <= mem_ram(to_integer(unsigned(mem_address)));
-            end if;
-        end process WORD_ROM_PROC;
-    end generate ROM_GEN; 
+    mem_dataout <= mem_ram(to_integer(unsigned(mem_address))) when mem_rden = '1' else
+                   (others => '0');
 
     --Output register or memory read data
 
