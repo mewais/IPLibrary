@@ -37,3 +37,5 @@ generate_target Simulation [get_files Tests/AXI4-RAM/AXI4_RAM_test.srcs/sources_
 export_ip_user_files -of_objects [get_files Tests/AXI4-RAM/AXI4_RAM_test.srcs/sources_1/bd/AXI4_RAM_test/AXI4_RAM_test.bd] -no_script -sync -force -quiet
 export_simulation -of_objects [get_files Tests/AXI4-RAM/AXI4_RAM_test.srcs/sources_1/bd/AXI4_RAM_test/AXI4_RAM_test.bd] -directory Tests/AXI4-RAM/AXI4_RAM_test.ip_user_files/sim_scripts -ip_user_files_dir Tests/AXI4-RAM/AXI4_RAM_test.ip_user_files -ipstatic_source_dir Tests/AXI4-RAM/AXI4_RAM_test.ip_user_files/ipstatic -lib_map_path [list {modelsim=Tests/AXI4-RAM/AXI4_RAM_test.cache/compile_simlib/modelsim} {questa=Tests/AXI4-RAM/AXI4_RAM_test.cache/compile_simlib/questa} {ies=Tests/AXI4-RAM/AXI4_RAM_test.cache/compile_simlib/ies} {xcelium=Tests/AXI4-RAM/AXI4_RAM_test.cache/compile_simlib/xcelium} {vcs=Tests/AXI4-RAM/AXI4_RAM_test.cache/compile_simlib/vcs} {riviera=Tests/AXI4-RAM/AXI4_RAM_test.cache/compile_simlib/riviera}] -use_ip_compiled_libs -force -quiet
 launch_simulation
+run 3000ns
+close_project

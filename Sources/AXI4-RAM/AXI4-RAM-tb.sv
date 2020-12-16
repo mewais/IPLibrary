@@ -23,6 +23,7 @@ xil_axi_data_beat [255:0] ruser;
 bit [8*4096-1:0] wdata;
 bit [8*4096-1:0] rdata;
 xil_axi_resp_t [255:0] resp;
+shortint i;
 
 AXI4_RAM_test_wrapper UUT
 (
@@ -56,19 +57,16 @@ initial begin
     region = 0;
     qos = 0;
     wuser = 0;
-    for (int i = 0; i < 512; i++) begin
+    for (i = 0; i < 512; i++) begin
         wdata[i*16 +: 16] = i;
     end
     master.AXI4_WRITE_BURST(id, addr, len, size, burst, lock, cache, prot, region, qos, wuser, wdata, wuser, resp);
     #50ns
     id = 1;
     master.AXI4_READ_BURST(id, addr, len, size, burst, lock, cache, prot, region, qos, wuser, rdata, resp, ruser);
-    for (int i = 0; i < 512; i++) begin
-        if (rdata[i*16 +: 16] != i) begin
-            $display("Incorrect value in RAM. Expected 0x%x but received 0x%x", i, rdata[i*16 +: 16]);
-        end else begin
-            $display("Correct value in RAM. Expected and received 0x%x", i);
-        end
+    #500ns
+    for (i = 0; i < 512; i++) begin
+        assert (rdata[i*16 +: 16] == i) else $display("Incorrect value in RAM. Expected 0x%x but received 0x%x", i, rdata[i*16 +: 16]);
     end
     #50ns
     id = 2;
@@ -86,11 +84,9 @@ initial begin
     master.AXI4_WRITE_BURST(id, addr, len, size, burst, lock, cache, prot, region, qos, wuser, wdata, wuser, resp);
     #50ns
     id = 3;
+    #500ns
     master.AXI4_READ_BURST(id, addr, len, size, burst, lock, cache, prot, region, qos, wuser, rdata, resp, ruser);
-    if (rdata[15:0] != 2048) begin
-        $display("Incorrect value in RAM. Expected 0x%x but received 0x%x", 2048, rdata[15:0]);
-    end else begin
-        $display("Correct value in RAM. Expected and received 0x%x", 2048);
-    end
+    i = 2048;
+    assert (rdata[15:0] == i) else $display("Incorrect value in RAM. Expected 0x%x but received 0x%x", 2048, rdata[15:0]);
 end
 endmodule
