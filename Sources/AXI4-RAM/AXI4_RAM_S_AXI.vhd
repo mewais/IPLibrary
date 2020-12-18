@@ -1,11 +1,12 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-
-use work.Utils.all;
+use ieee.std_logic_textio.all;
 
 library std;
 use std.textio.all;
+
+use work.Utils.all;
 
 entity AXI4_RAM_S_AXI is
     generic
@@ -229,13 +230,11 @@ architecture arch_imp of AXI4_RAM_S_AXI is
     impure function init_mem(mif_file_name : in string) return WORD_RAM_TYPE is
         file mif_file : text open read_mode is mif_file_name;
         variable mif_line : line;
-        variable temp_bv : bit_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
         variable temp_mem : WORD_RAM_TYPE;
     begin
         for i in WORD_RAM_TYPE'range loop
             readline(mif_file, mif_line);
-            read(mif_line, temp_bv);
-            temp_mem(i) := to_stdlogicvector(temp_bv);
+            hread(mif_line, temp_mem(i));
         end loop;
         return temp_mem;
     end function;
