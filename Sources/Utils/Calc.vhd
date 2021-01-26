@@ -1,8 +1,8 @@
-package Utils is
+package Calc is
 	function LOG2 (x: NATURAL) return INTEGER;
-end package ; -- Utils
+end package ; -- Calc
 
-package body Utils is
+package body Calc is
 	function LOG2(x : natural) return integer is
 		variable i  : integer := 0;
 	  	variable val: integer := 1;
@@ -25,4 +25,4 @@ package body Utils is
 	    	return i;
 		end if;
 	end function LOG2;
-end Utils ;
+end Calc ;

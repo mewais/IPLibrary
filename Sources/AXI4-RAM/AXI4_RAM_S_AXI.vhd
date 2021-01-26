@@ -6,7 +6,7 @@ use ieee.std_logic_textio.all;
 library std;
 use std.textio.all;
 
-use work.Utils.all;
+use work.Calc.all;
 
 entity AXI4_RAM_S_AXI is
     generic

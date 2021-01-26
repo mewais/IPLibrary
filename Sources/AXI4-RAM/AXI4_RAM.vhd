@@ -2,7 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-use work.Utils.all;
+use work.Calc.all;
 
 entity AXI4_RAM is
 	generic (

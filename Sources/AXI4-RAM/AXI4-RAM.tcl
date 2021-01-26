@@ -4,11 +4,11 @@ set_property target_language VHDL [current_project]
 set_property simulator_language VHDL [current_project]
 set_property target_simulator XSim [current_project]
 set_property ip_repo_paths [list ./AXI4-IPs] [current_project]
-add_files -norecurse {./Sources/AXI4-RAM/Utils.vhd ./Sources/AXI4-RAM/AXI4_RAM_S_AXI.vhd ./Sources/AXI4-RAM/AXI4_RAM.vhd}
+add_files -norecurse {./Sources/Utils/Calc.vhd ./Sources/AXI4-RAM/AXI4_RAM_S_AXI.vhd ./Sources/AXI4-RAM/AXI4_RAM.vhd}
 set_property top AXI4_RAM [current_fileset]
 
 # Create IP
-ipx::package_project -root_dir ./AXI4-IPs/AXI4-RAM -import_files {./Sources/AXI4-RAM/Utils.vhd ./Sources/AXI4-RAM/AXI4_RAM_S_AXI.vhd ./Sources/AXI4-RAM/AXI4_RAM.vhd} -vendor mohammad.ewais.ca -library AXI4 -taxonomy {/AXI_Infrastructure /Memories_&_Storage_Elements/RAMs_&_ROMs}
+ipx::package_project -root_dir ./AXI4-IPs/AXI4-RAM -import_files {./Sources/Utils/Calc.vhd ./Sources/AXI4-RAM/AXI4_RAM_S_AXI.vhd ./Sources/AXI4-RAM/AXI4_RAM.vhd} -vendor mohammad.ewais.ca -library AXI4 -taxonomy {/AXI_Infrastructure /Memories_&_Storage_Elements/RAMs_&_ROMs}
 set_property vendor_display_name {Mohammad Ewais} [ipx::current_core]
 set_property name AXI4_RAM [ipx::current_core]
 set_property display_name {AXI4 RAM v1.0} [ipx::current_core]
