@@ -1,5 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 use work.Calc.all;
 
@@ -58,8 +59,11 @@ architecture arch of WC_FIFO is
     signal read_empty_internal  : std_logic;
     signal write_full_internal  : std_logic;
 
-    type RAM_TYPE is (DEPTH-1 downto 0, MINS_PER_MAX-1 downto 0) of (MIN_WIDTH-1 downto 0);
-    signal RAM is RAM_TYPE;
+    type RAM_TYPE is array (DEPTH-1 downto 0, MINS_PER_MAX-1 downto 0) of std_logic_vector(MIN_WIDTH-1 downto 0);
+    signal RAM : RAM_TYPE;
+    
+    -- Stupid vivado does not support IPs with VHDL 2008 yet, use the following instead of reduction AND
+    constant all_ones       : std_logic_vector(OFFSET-1 downto 0) := (others => '1');
 begin
 
     ASYNC: if ASYNCHRONOUS = true generate
@@ -70,8 +74,8 @@ begin
                 if (read_reset = '1') then
                     read_pointer <= (others => '0');
                 elsif (read_clk'event and read_clk = '1') then
-                    if (read_enable and not read_empty_internal) then
-                        read_pointer <= read_pointer + 1;
+                    if (read_enable = '1' and read_empty_internal = '0') then
+                        read_pointer <= std_logic_vector(unsigned(read_pointer) + 1);
                     end if;
                 end if;
             end process;
@@ -81,13 +85,13 @@ begin
                     write_pointer <= (others => '0');
                     RAM <= (others => (others => (others => '0')));
                 elsif (write_clk'event and write_clk = '1') then
-                    if (write_enable and not write_full_internal) then
-                        RAM(to_integer(unsigned(write_pointer(LOG2(DEPTH)-1 downto 0))))(0) <= write_data;
-                        write_pointer <= write_pointer + 1;
+                    if (write_enable = '1' and write_full_internal = '0') then
+                        RAM(to_integer(unsigned(write_pointer(LOG2(DEPTH)-1 downto 0))), 0) <= write_data;
+                        write_pointer <= std_logic_vector(unsigned(write_pointer) + 1);
                     end if;
                 end if;
             end process;
-            read_data <= RAM(to_integer(unsigned(read_pointer(LOG2(DEPTH)-1 downto 0))))(0);
+            read_data <= RAM(to_integer(unsigned(read_pointer(LOG2(DEPTH)-1 downto 0))), 0);
             read_empty_internal <= '1' when read_gray = sync_write_pointer else
                                    '0';
             write_full_internal <= '1' when sync_read_pointer(LOG2(DEPTH)-2 downto 0) = write_gray(LOG2(DEPTH)-2 downto 0) and sync_read_pointer(LOG2(DEPTH)) /= write_gray(LOG2(DEPTH)) and sync_read_pointer(LOG2(DEPTH)-1) /= write_gray(LOG2(DEPTH)-1) else
@@ -101,8 +105,8 @@ begin
                 if (read_reset = '1') then
                     read_pointer <= (others => '0');
                 elsif (read_clk'event and read_clk = '1') then
-                    if (read_enable and not read_empty_internal) then
-                        read_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) <= read_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) + 1;
+                    if (read_enable = '1' and read_empty_internal = '0') then
+                        read_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) <= std_logic_vector(unsigned(read_pointer(LOG2(DEPTH)+OFFSET downto OFFSET)) + 1);
                     end if;
                 end if;
             end process;
@@ -112,14 +116,14 @@ begin
                     write_pointer <= (others => '0');
                     RAM <= (others => (others => (others => '0')));
                 elsif (write_clk'event and write_clk = '1') then
-                    if (write_enable and not write_full_internal) then
-                        RAM(to_integer(unsigned(write_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET))))(to_integer(unsigned(write_pointer(OFFSET-1 downto 0)))) <= write_data;
-                        write_pointer <= write_pointer + 1;
+                    if (write_enable = '1' and write_full_internal = '0') then
+                        RAM(to_integer(unsigned(write_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET))), to_integer(unsigned(write_pointer(OFFSET-1 downto 0)))) <= write_data;
+                        write_pointer <= std_logic_vector(unsigned(write_pointer) + 1);
                     end if;
                 end if;
             end process;
             BIGGER_READ: for i in MINS_PER_MAX-1 downto 0 generate
-                read_data((MIN_WIDTH*(i+1))-1 downto MIN_WIDTH*i) <= RAM(to_integer(unsigned(read_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET))))(i);
+                read_data((MIN_WIDTH*(i+1))-1 downto MIN_WIDTH*i) <= RAM(to_integer(unsigned(read_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET))), i);
             end generate;
             read_empty_internal <= '1' when read_gray(LOG2(DEPTH)+OFFSET downto OFFSET) = sync_write_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) else
                                    '0';
@@ -134,8 +138,8 @@ begin
                 if (read_reset = '1') then
                     read_pointer <= (others => '0');
                 elsif (read_clk'event and read_clk = '1') then
-                    if (read_enable and not read_empty_internal) then
-                        read_pointer <= read_pointer + 1;
+                    if (read_enable = '1' and read_empty_internal = '0') then
+                        read_pointer <= std_logic_vector(unsigned(read_pointer) + 1);
                     end if;
                 end if;
             end process;
@@ -145,24 +149,24 @@ begin
                     write_pointer <= (others => '0');
                     RAM <= (others => (others => (others => '0')));
                 elsif (write_clk'event and write_clk = '1') then
-                    if (write_enable and not write_full_internal) then
+                    if (write_enable = '1' and write_full_internal = '0') then
                         SMALLER_WRITE: for i in MINS_PER_MAX-1 downto 0 loop
-                            RAM(to_integer(unsigned(write_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET))))(i) <= write_data((MIN_WIDTH*(i+1))-1 downto MIN_WIDTH*i);
+                            RAM(to_integer(unsigned(write_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET))), i) <= write_data((MIN_WIDTH*(i+1))-1 downto MIN_WIDTH*i);
                         end loop;
-                        write_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) <= write_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) + 1;
+                        write_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) <= std_logic_vector(unsigned(write_pointer(LOG2(DEPTH)+OFFSET downto OFFSET)) + 1);
                     end if;
                 end if;
             end process;
-            read_data <= RAM(to_integer(unsigned(read_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET))))(to_integer(unsigned(read_pointer(OFFSET-1 downto 0))));
-            read_empty_internal <= '1' when read_gray(LOG2(DEPTH)+OFFSET downto OFFSET) = sync_write_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) and (and read_pointer(OFFSET-1 downto 0) = '1')  else
+            read_data <= RAM(to_integer(unsigned(read_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET))), to_integer(unsigned(read_pointer(OFFSET-1 downto 0))));
+            read_empty_internal <= '1' when (read_gray(LOG2(DEPTH)+OFFSET downto OFFSET) = sync_write_pointer(LOG2(DEPTH)+OFFSET downto OFFSET)) and (read_pointer(OFFSET-1 downto 0) = all_ones) else
                                    '0';
             write_full_internal <= '1' when sync_read_pointer(LOG2(DEPTH)+OFFSET-2 downto OFFSET) = write_gray(LOG2(DEPTH)+OFFSET-2 downto OFFSET) and sync_read_pointer(LOG2(DEPTH)+OFFSET) /= write_gray(LOG2(DEPTH)+OFFSET) and sync_read_pointer(LOG2(DEPTH)+OFFSET-1) /= write_gray(LOG2(DEPTH)+OFFSET-1)else
                                    '0';
         end generate;
 
         -- Synchronous stuff
-        read_gray <= (read_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET) srl 1) xor read_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET);
-        write_gray <= (write_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET) srl 1) xor write_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET);
+        read_gray <= ('0' & read_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET+1)) xor read_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET);
+        write_gray <= ('0' & write_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET+1)) xor write_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET);
         CDC1: Synchronizer
             generic map(LOG2(DEPTH)+OFFSET+1)
             port map(write_gray, read_clk, read_reset, sync_write_pointer);
@@ -177,23 +181,23 @@ begin
     SYNC: if ASYNCHRONOUS = false generate
         -- Equal
         EQUAL: if READ_WIDTH = WRITE_WIDTH generate
-            process (clk, reset)
+            process (write_clk, write_reset)
             begin
-                if (reset = '1') then
+                if (write_reset = '1') then
                     read_pointer <= (others => '0');
                     write_pointer <= (others => '0');
                     RAM <= (others => (others => (others => '0')));
-                elsif (clk'event and clk = '1') then
-                    if (write_enable and not write_full_internal) then
-                        RAM(to_integer(unsigned(write_pointer(LOG2(DEPTH)-1 downto 0))))(0) <= write_data;
-                        write_pointer <= write_pointer + 1;
+                elsif (write_clk'event and write_clk = '1') then
+                    if (write_enable = '1' and write_full_internal = '0') then
+                        RAM(to_integer(unsigned(write_pointer(LOG2(DEPTH)-1 downto 0))), 0) <= write_data;
+                        write_pointer <= std_logic_vector(unsigned(write_pointer) + 1);
                     end if;
-                    if (read_enable and not read_empty_internal) then
-                        read_pointer <= read_pointer + 1;
+                    if (read_enable = '1' and read_empty_internal = '0') then
+                        read_pointer <= std_logic_vector(unsigned(read_pointer) + 1);
                     end if;
                 end if;
             end process;
-            read_data <= RAM(to_integer(unsigned(read_pointer(LOG2(DEPTH)-1 downto 0))))(0);
+            read_data <= RAM(to_integer(unsigned(read_pointer(LOG2(DEPTH)-1 downto 0))), 0);
             read_empty_internal <= '1' when read_pointer = write_pointer else
                                    '0';
             write_full_internal <= '1' when read_pointer(LOG2(DEPTH)-1 downto 0) = write_pointer(LOG2(DEPTH)-1 downto 0) and read_pointer(LOG2(DEPTH)) /= write_pointer(LOG2(DEPTH)) else
@@ -202,24 +206,24 @@ begin
 
         -- Output Bigger
         BIGGER: if READ_WIDTH > WRITE_WIDTH generate
-            process (clk, reset)
+            process (write_clk, write_reset)
             begin
-                if (reset = '1') then
+                if (write_reset = '1') then
                     read_pointer <= (others => '0');
                     write_pointer <= (others => '0');
                     RAM <= (others => (others => (others => '0')));
-                elsif (clk'event and clk = '1') then
-                    if (write_enable and not write_full_internal) then
-                        RAM(to_integer(unsigned(write_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET))))(to_integer(unsigned(write_pointer(OFFSET-1 downto 0)))) <= write_data;
-                        write_pointer <= write_pointer + 1;
+                elsif (write_clk'event and write_clk = '1') then
+                    if (write_enable = '1' and write_full_internal = '0') then
+                        RAM(to_integer(unsigned(write_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET))), to_integer(unsigned(write_pointer(OFFSET-1 downto 0)))) <= write_data;
+                        write_pointer <= std_logic_vector(unsigned(write_pointer) + 1);
                     end if;
-                    if (read_enable and not read_empty_internal) then
-                        read_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) <= read_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) + 1;
+                    if (read_enable = '1' and read_empty_internal = '0') then
+                        read_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) <= std_logic_vector(unsigned(read_pointer(LOG2(DEPTH)+OFFSET downto OFFSET)) + 1);
                     end if;
                 end if;
             end process;
             BIGGER_READ: for i in MINS_PER_MAX-1 downto 0 generate
-                read_data((MIN_WIDTH*(i+1))-1 downto MIN_WIDTH*i) <= RAM(to_integer(unsigned(read_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET))))(i);
+                read_data((MIN_WIDTH*(i+1))-1 downto MIN_WIDTH*i) <= RAM(to_integer(unsigned(read_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET))), i);
             end generate;
             read_empty_internal <= '1' when read_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) = write_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) else
                                    '0';
@@ -229,26 +233,26 @@ begin
 
         -- Output Smaller
         SMALLER: if READ_WIDTH < WRITE_WIDTH generate
-            process (clk, reset)
+            process (write_clk, write_reset)
             begin
-                if (reset = '1') then
+                if (write_reset = '1') then
                     read_pointer <= (others => '0');
                     write_pointer <= (others => '0');
                     RAM <= (others => (others => (others => '0')));
-                elsif (clk'event and clk = '1') then
-                    if (write_enable and not write_full_internal) then
+                elsif (write_clk'event and write_clk = '1') then
+                    if (write_enable = '1' and write_full_internal = '0') then
                         SMALLER_WRITE: for i in MINS_PER_MAX-1 downto 0 loop
-                            RAM(to_integer(unsigned(write_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET))))(i) <= write_data((MIN_WIDTH*(i+1))-1 downto MIN_WIDTH*i);
+                            RAM(to_integer(unsigned(write_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET))), i) <= write_data((MIN_WIDTH*(i+1))-1 downto MIN_WIDTH*i);
                         end loop;
-                        write_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) <= write_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) + 1;
+                        write_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) <= std_logic_vector(unsigned(write_pointer(LOG2(DEPTH)+OFFSET downto OFFSET)) + 1);
                     end if;
-                    if (read_enable and not read_empty_internal) then
-                        read_pointer <= read_pointer + 1;
+                    if (read_enable = '1' and read_empty_internal = '0') then
+                        read_pointer <= std_logic_vector(unsigned(read_pointer) + 1);
                     end if;
                 end if;
             end process;
-            read_data <= RAM(to_integer(unsigned(read_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET))))(to_integer(unsigned(read_pointer(OFFSET-1 downto 0))));
-            read_empty_internal <= '1' when read_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) = write_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) and (and read_pointer(OFFSET-1 downto 0) = '1')  else
+            read_data <= RAM(to_integer(unsigned(read_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET))), to_integer(unsigned(read_pointer(OFFSET-1 downto 0))));
+            read_empty_internal <= '1' when read_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) = write_pointer(LOG2(DEPTH)+OFFSET downto OFFSET) and (read_pointer(OFFSET-1 downto 0) = all_ones)  else
                                    '0';
             write_full_internal <= '1' when read_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET) = write_pointer(LOG2(DEPTH)+OFFSET-1 downto OFFSET) and read_pointer(LOG2(DEPTH)+OFFSET) /= write_pointer(LOG2(DEPTH)+OFFSET) else
                                    '0';
