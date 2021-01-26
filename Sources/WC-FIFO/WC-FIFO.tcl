@@ -32,6 +32,7 @@ ipx::save_bus_definition [ipx::current_busdef]
 ipx::save_abstraction_definition [ipx::current_busabs]
 update_ip_catalog -rebuild
 ipx::infer_bus_interface {write_enable write_data write_full} mohammad.ewais.ca:ME_IPs:fifo_write:1.0 [ipx::current_core]
+
 ipx::create_abstraction_definition mohammad.ewais.ca ME_IPs fifo_read_rtl 1.0
 ipx::create_bus_definition mohammad.ewais.ca ME_IPs fifo_read 1.0
 set_property xml_file_name ./IPs/fifo_read_rtl.xml [ipx::current_busabs]
@@ -46,6 +47,8 @@ ipx::save_bus_definition [ipx::current_busdef]
 ipx::save_abstraction_definition [ipx::current_busabs]
 update_ip_catalog -rebuild
 ipx::infer_bus_interface {read_enable read_data read_empty} mohammad.ewais.ca:ME_IPs:fifo_read:1.0 [ipx::current_core]
+set_property interface_mode master [ipx::get_bus_interfaces fifo_read_1 -of_objects [ipx::current_core]]
+
 set_property enablement_dependency {$ASYNCHRONOUS = true} [ipx::get_bus_interfaces read_reset -of_objects [ipx::current_core]]
 set_property enablement_dependency {$ASYNCHRONOUS = true} [ipx::get_bus_interfaces read_clk -of_objects [ipx::current_core]]
 
