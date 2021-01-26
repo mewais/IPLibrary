@@ -1,5 +1,7 @@
 package Calc is
 	function LOG2 (x: NATURAL) return INTEGER;
+	function MAX (x: INTEGER; y: INTEGER) return INTEGER;
+	function MIN (x: INTEGER; y: INTEGER) return INTEGER;
 end package ; -- Calc
 
 package body Calc is
@@ -25,4 +27,23 @@ package body Calc is
 	    	return i;
 		end if;
 	end function LOG2;
+	
+    function MAX (x: INTEGER; y: INTEGER) return INTEGER is
+    begin
+        if x > y then
+            return x;
+        else
+            return y;
+        end if;
+    end function MAX;
+	
+    function MIN (x: INTEGER; y: INTEGER) return INTEGER is
+    begin
+        if x < y then
+            return x;
+        else
+            return y;
+        end if;
+    end function MIN;
+
 end Calc ;
