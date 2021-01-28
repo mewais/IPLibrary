@@ -10,6 +10,10 @@ WC-FIFO: Sources/WC-FIFO/*
 	rm -rf IPs/WC-FIFO/
 	vivado -nolog -nojournal -mode batch -source Sources/WC-FIFO/WC-FIFO.tcl
 
+AXI4S-Replicator: Sources/AXI4S-Replicator/*
+	rm -rf IPs/AXI4S-Replicator/
+	vivado -nolog -nojournal -mode batch -source Sources/AXI4S-Replicator/AXI4S-Replicator.tcl
+
 AXI4-RAM-test: Sources/AXI4-RAM/*
 	rm -rf Tests/AXI4-RAM/
 	vivado -nolog -nojournal -mode batch -source Sources/AXI4-RAM/AXI4-RAM-test.tcl
