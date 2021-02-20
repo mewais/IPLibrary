@@ -6,6 +6,10 @@ AXI4-RAM: Sources/AXI4-RAM/*
 	rm -rf IPs/AXI4-RAM/
 	vivado -nolog -nojournal -mode batch -source Sources/AXI4-RAM/AXI4-RAM.tcl
 
+AXI4-GPIO: Sources/AXI4-GPIO/*
+	rm -rf IPs/AXI4-GPIO/
+	vivado -nolog -nojournal -mode batch -source Sources/AXI4-GPIO/AXI4-GPIO.tcl
+
 WC-FIFO: Sources/WC-FIFO/*
 	rm -rf IPs/WC-FIFO/
 	vivado -nolog -nojournal -mode batch -source Sources/WC-FIFO/WC-FIFO.tcl
