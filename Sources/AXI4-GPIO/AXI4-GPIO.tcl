@@ -5,6 +5,8 @@ set_property simulator_language VHDL [current_project]
 set_property target_simulator XSim [current_project]
 set_property ip_repo_paths [list ./IPs] [current_project]
 add_files -norecurse {./Sources/Utils/Calc.vhd ./Sources/Utils/Types.vhd ./Sources/AXI4-GPIO/AXI4_GPIO_S_AXI.vhd ./Sources/AXI4-GPIO/AXI4_GPIO.vhd}
+set_property file_type {VHDL 2008} [get_files ./Sources/AXI4-GPIO/AXI4_GPIO_S_AXI.vhd]
+set_property file_type {VHDL 2008} [get_files ./Sources/AXI4-GPIO/AXI4_GPIO.vhd]
 set_property top AXI4_GPIO [current_fileset]
 
 # Create IP
