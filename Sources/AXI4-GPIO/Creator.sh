@@ -74,7 +74,7 @@ entity AXI4_GPIO is
 
 in_ports=""
 out_ports=""
-in_assigns=""
+assigns=""
 out_assigns=""
 for i in $(seq -f "%03g" 0 $GPIOS)
 do
@@ -82,10 +82,11 @@ do
         GPIO_${i}_IN         : in std_logic_vector(GPIO_WIDTH-1 downto 0);"
     out_ports+="
         GPIO_${i}_OUT        : out std_logic_vector(GPIO_WIDTH-1 downto 0);"
-    in_assigns+="
-    GPIO_IN(${i}) <= GPIO_${i}_IN;"
-    out_assigns+="
-    GPIO_${i}_OUT <= GPIO_OUT(${i});"
+    assigns+="
+    IN_OUT_${i}: if ${i}<GPIO_DEPTH generate
+        GPIO_IN(${i}) <= GPIO_${i}_IN;
+        GPIO_${i}_OUT <= GPIO_OUT(${i});
+    end generate IN_OUT_${i};"
 done
 
 file+="${in_ports}"
@@ -230,10 +231,8 @@ begin
 		S_AXI_RREADY	=> s00_axi_rready
 	);
 
-    ${in_assigns}
+    ${assigns}
     
-    ${out_assigns}
-
 end arch_imp;"
 
 echo "$file" > AXI4_GPIO.vhd
